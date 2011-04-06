@@ -60,6 +60,14 @@ Melfas touchkey register
 
 #define DEVICE_NAME "melfas-touchkey"
 
+#ifdef CONFIG_KEYPAD_CYPRESS_TOUCH_USE_BLN
+//todo: update this everytime you modify BacklightNotification
+#define BACKLIGHTNOTIFICATION_VERSION 7
+
+#define BACKLIGHT_ON 1
+#define BACKLIGHT_OFF 2
+#endif
+
 #if defined(CONFIG_S5PC110_T959_BOARD) || defined(CONFIG_S5PC110_HAWK_BOARD) || defined(CONFIG_S5PC110_VIBRANTPLUS_BOARD)
 static int touchkey_keycode[] = {NULL, KEY_BACK, KEY_ENTER, KEY_MENU, KEY_END}; // BEHOLD3
 #else
