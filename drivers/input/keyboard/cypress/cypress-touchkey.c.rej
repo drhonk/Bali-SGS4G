@@ -1,0 +1,135 @@
+--- drivers/input/keyboard/cypress/cypress-touchkey.c
++++ drivers/input/keyboard/cypress/cypress-touchkey.c
+@@ -57,6 +58,14 @@
+ 
+ #define DEVICE_NAME "melfas-touchkey"
+ 
++#ifdef CONFIG_KEYPAD_CYPRESS_TOUCH_USE_BLN
++//todo: update this everytime you modify BacklightNotification
++#define BACKLIGHTNOTIFICATION_VERSION 7
++
++#define BACKLIGHT_ON 1
++#define BACKLIGHT_OFF 2
++#endif
++
+ static int touchkey_keycode[5] =
+     { NULL, KEY_BACK, KEY_MENU, KEY_ENTER, KEY_END };
+ 
+@@ -227,7 +273,11 @@
+ 					 touchkey_keycode[2], 0);
+ 			retry = 10;
+ 			while (retry--) {
++#ifdef CONFIG_KEYPAD_CYPRESS_TOUCH_USE_BLN
++				touchkey_power_off();
++#else
+ 				gpio_direction_output(_3_GPIO_TOUCH_EN, 0);
++#endif
+ 				mdelay(300);
+ 				init_hw();
+ 				if (i2c_touchkey_read(KEYCODE_REG, data, 3) >=
+@@ -244,12 +294,16 @@
+ 			//touchkey die , do not enable touchkey
+ 			//enable_irq(IRQ_TOUCH_INT);
+ 			touchkey_enable = -1;
++#ifdef CONFIG_KEYPAD_CYPRESS_TOUCH_USE_BLN
++			touchkey_power_off_with_i2c();
++#else
+ 			gpio_direction_output(_3_GPIO_TOUCH_EN, 0);
+ #if !defined(CONFIG_ARIES_NTT)
+ 			gpio_direction_output(_3_GPIO_TOUCH_CE, 0);
+ #endif
+ 			gpio_direction_output(_3_TOUCH_SDA_28V, 0);
+ 			gpio_direction_output(_3_TOUCH_SCL_28V, 0);
++#endif
+ 			printk("%s touchkey died\n", __func__);
+ 			set_touchkey_debug('D');
+ 			return;
+@@ -336,12 +390,16 @@
+ 	}
+ 
+ 	disable_irq(IRQ_TOUCH_INT);
++#ifdef CONFIG_KEYPAD_CYPRESS_TOUCH_USE_BLN
++	touchkey_power_off_with_i2c();
++#else
+ 	gpio_direction_output(_3_GPIO_TOUCH_EN, 0);
+ #if !defined(CONFIG_ARIES_NTT)
+ 	gpio_direction_output(_3_GPIO_TOUCH_CE, 0);
+ #endif
+ 	gpio_direction_output(_3_TOUCH_SDA_28V, 0);
+ 	gpio_direction_output(_3_TOUCH_SCL_28V, 0);
++#endif
+ }
+ 
+ static void melfas_touchkey_early_resume(struct early_suspend *h)
+@@ -353,10 +411,14 @@
+ 		       touchkey_enable);
+ 		return;
+ 	}
++#ifdef CONFIG_KEYPAD_CYPRESS_TOUCH_USE_BLN
++	touchkey_power_on();
++#else
+ 	gpio_direction_output(_3_GPIO_TOUCH_EN, 1);
+ #if !defined(CONFIG_ARIES_NTT)
+ 	gpio_direction_output(_3_GPIO_TOUCH_CE, 1);
+ #endif
++#endif
+ 	msleep(50);
+ 
+ 	//clear interrupt
+@@ -444,10 +506,14 @@
+ 
+ static void init_hw(void)
+ {
++#ifdef CONFIG_KEYPAD_CYPRESS_TOUCH_USE_BLN
++	touchkey_power_on();
++#else
+ 	gpio_direction_output(_3_GPIO_TOUCH_EN, 1);
+ #if !defined(CONFIG_ARIES_NTT)
+ 	gpio_direction_output(_3_GPIO_TOUCH_CE, 1);
+ #endif
++#endif
+ 	msleep(200);
+ 	s3c_gpio_setpull(_3_GPIO_TOUCH_INT, S3C_GPIO_PULL_NONE);
+ 	set_irq_type(IRQ_TOUCH_INT, IRQ_TYPE_LEVEL_LOW);
+@@ -646,18 +736,26 @@
+ 	if (*buf == '0') {
+ 		set_touchkey_debug('d');
+ 		disable_irq(IRQ_TOUCH_INT);
++#ifdef CONFIG_KEYPAD_CYPRESS_TOUCH_USE_BLN
++		touchkey_power_off();
++#else
+ 		gpio_direction_output(_3_GPIO_TOUCH_EN, 0);
+ #if !defined(CONFIG_ARIES_NTT)
+ 		gpio_direction_output(_3_GPIO_TOUCH_CE, 0);
+ #endif
++#endif
+ 		touchkey_enable = -2;
+ 	} else if (*buf == '1') {
+ 		if (touchkey_enable == -2) {
+ 			set_touchkey_debug('e');
++#ifdef CONFIG_KEYPAD_CYPRESS_TOUCH_USE_BLN
++			touchkey_power_on();
++#else
+ 			gpio_direction_output(_3_GPIO_TOUCH_EN, 1);
+ #if !defined(CONFIG_ARIES_NTT)
+ 			gpio_direction_output(_3_GPIO_TOUCH_CE, 1);
+ #endif
++#endif
+ 			touchkey_enable = 1;
+ 			enable_irq(IRQ_TOUCH_INT);
+ 		}
+@@ -930,10 +1193,14 @@
+ 			set_touchkey_debug('f');
+ 		}
+ 		if (retry <= 0) {
++#ifdef CONFIG_KEYPAD_CYPRESS_TOUCH_USE_BLN
++			touchkey_power_off();
++#else
+ 			gpio_direction_output(_3_GPIO_TOUCH_EN, 0);
+ #if !defined(CONFIG_ARIES_NTT)
+ 			gpio_direction_output(_3_GPIO_TOUCH_CE, 0);
+ #endif
++#endif
+ 			msleep(300);
+ 		}
+ 		init_hw();	//after update, re initalize.
