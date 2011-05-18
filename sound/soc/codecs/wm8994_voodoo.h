@@ -6,8 +6,32 @@
  * published by the Free Software Foundation.
  */
 
+<<<<<<< HEAD
 bool is_path(int unified_path);
 
+=======
+#if defined(CONFIG_MACH_HERRING) || defined (CONFIG_SAMSUNG_GALAXYS)	       \
+	|| defined (CONFIG_SAMSUNG_GALAXYSB)				       \
+	|| defined (CONFIG_SAMSUNG_CAPTIVATE)				       \
+	|| defined (CONFIG_SAMSUNG_VIBRANT)				       \
+	|| defined (CONFIG_SAMSUNG_FASCINATE)				       \
+	|| defined (CONFIG_SAMSUNG_EPIC)
+#define NEXUS_S
+#endif
+
+#ifdef CONFIG_FB_S3C_AMS701KA
+#define GALAXY_TAB
+#endif
+
+#ifdef CONFIG_M110S
+#define M110S
+#endif
+
+enum unified_path { HEADPHONES, RADIO_HEADPHONES, SPEAKER, MAIN_MICROPHONE };
+
+bool is_path(int unified_path);
+unsigned short tune_fll_value(unsigned short val);
+>>>>>>> upstream/froyo-voodoo-sound
 unsigned int voodoo_hook_wm8994_write(struct snd_soc_codec *codec,
 				      unsigned int reg, unsigned int value);
 void voodoo_hook_fmradio_headset(void);
@@ -26,6 +50,7 @@ void update_fll_tuning(bool with_mute);
 void update_mono_downmix(bool with_mute);
 void update_dac_direct(bool with_mute);
 void update_enable(void);
+<<<<<<< HEAD
 
 unsigned short tune_fll_value(unsigned short val);
 
@@ -42,3 +67,5 @@ unsigned short tune_fll_value(unsigned short val);
 #endif
 
 enum unified_path { HEADPHONES, RADIO_HEADPHONES, SPEAKER, MAIN_MICROPHONE };
+=======
+>>>>>>> upstream/froyo-voodoo-sound
